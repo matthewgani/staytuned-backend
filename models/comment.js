@@ -5,6 +5,10 @@ const commentSchema = new mongoose.Schema({
   content: String,
   date: Date,
   songID: String,
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  }
 })
 
 // to remove fields from returned object

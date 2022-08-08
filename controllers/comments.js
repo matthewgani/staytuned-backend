@@ -1,13 +1,13 @@
 const commentsRouter = require('express').Router()
 const Comment = require('../models/comment')
-// const User = require('../models/user')
+
+const User = require('../models/user')
 // const jwt = require('jsonwebtoken')
 // const { userExtractor } = require('../utils/middleware')
 
 commentsRouter.get('/', async (request, response) => {
-  Comment.find({}).then(notes => {
-    response.json(notes)
-  })
+  const comments = await Comment.find({}).populate('user',{ username: 1, name: 1 })
+  response.json(comments)
 })
 
 commentsRouter.get('/:id', async (request, response, next) => {
@@ -33,6 +33,8 @@ commentsRouter.delete('/:id', async (request, response, next) => {
 commentsRouter.post('/', async (request, response) => {
   const body = request.body
 
+  const user = await User.findById(body.userId)
+
   if (body.content === undefined) {
     return response.status(400).json({ error: 'content missing' })
   }
@@ -41,11 +43,18 @@ commentsRouter.post('/', async (request, response) => {
     content: body.content,
     date: new Date(),
     songID: body.songID,
+    user: user._id
   })
 
-  comment.save().then(savedComment => {
-    response.json(savedComment)
-  })
+  const savedComment = await comment.save()
+  user.comments = user.comments.concat(savedComment._id)
+  await user.save()
+
+  response.status(201).json(savedComment)
+
+  // errors are automatically handled by middleware dye to the express-async-errors library
+  // havent installed
+
 })
 
 commentsRouter.put('/:id', async (request, response, next) => {
