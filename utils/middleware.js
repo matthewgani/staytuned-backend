@@ -10,10 +10,12 @@ const requestLogger = (request, response, next) => {
   next()
 }
 
+// used before errorHandler
 const unknownEndpoint = (request, response) => {
   response.status(404).send({ error: 'unknown endpoint' })
 }
 
+// must have next in params or can lead to 500 error
 const errorHandler = (error, request, response, next) => {
   logger.error(error.name)
   logger.error(error.message)
@@ -31,6 +33,7 @@ const errorHandler = (error, request, response, next) => {
       error: 'token expired'
     })
   } else {
+    // included in case of other bad token errors like syntaxError
     return response.status(400).send({ error: error.message })
   }
 

@@ -8,7 +8,8 @@ const commentSchema = new mongoose.Schema({
   user: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User'
-  }
+  },
+  likes: Number,
 })
 
 // to remove fields from returned object

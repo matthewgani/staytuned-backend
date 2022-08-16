@@ -9,14 +9,17 @@ commentsRouter.get('/', async (request, response) => {
 })
 
 // get a specific comment based on id
-commentsRouter.get('/:id', async (request, response) => {
+commentsRouter.get('/:id', async (request, response, next) => {
 
-  const comment = await Comment.findById(request.params.id).populate('user',{ username: 1, name: 1 })
-
-  if (comment) {
-    response.json(comment)
-  } else {
-    response.status(404).end()
+  try {
+    const comment = await Comment.findById(request.params.id).populate('user',{ username: 1, name: 1 })
+    if (comment) {
+      response.json(comment)
+    } else {
+      response.status(404).end()
+    }
+  } catch (exception) {
+    next(exception)
   }
 })
 
@@ -54,8 +57,12 @@ commentsRouter.delete('/:id', userExtractor, async (request, response) => {
 // you can only post a comment if you are logged in
 // we check token and user
 commentsRouter.post('/', userExtractor, async (request, response) => {
+  if (request.body.likes === undefined) {
+    request.body.likes = 0
+  }
   const body = request.body
-  // console.log(request)
+
+
   //user is already created using userExtractor
   //userExtractor in turn uses tokenExtractor in middleware
   const user = request.user
@@ -68,7 +75,8 @@ commentsRouter.post('/', userExtractor, async (request, response) => {
     content: body.content,
     date: new Date(),
     songID: body.songID,
-    user: user._id
+    user: user._id,
+    likes: body.likes,
   })
 
   const savedComment = await comment.save()
@@ -83,18 +91,15 @@ commentsRouter.post('/', userExtractor, async (request, response) => {
 
 })
 
-commentsRouter.put('/:id', async (request, response, next) => {
-  const { content, songID } = request.body
+commentsRouter.put('/:id', async (request, response) => {
+  const { content, songID, likes } = request.body
 
-  Comment.findByIdAndUpdate(
+  const updatedComment = await Comment.findByIdAndUpdate(
     request.params.id,
-    { content, songID },
+    { content, songID, likes },
     { new: true, runValidators: true, context: 'query' }
   )
-    .then(updatedComment => {
-      response.json(updatedComment)
-    })
-    .catch(error => next(error))
+  response.json(updatedComment)
 })
 
 module.exports = commentsRouter
