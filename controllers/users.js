@@ -14,15 +14,21 @@ usersRouter.post('/', async (request, response) => {
   // can also implement checking for username permitted char
   // and password strength
 
-  if (!username||!password) {
+  if (!username||!password||!name) {
     return response.status(400).json({
-      error: 'username or password was not given'
+      error: 'all fields must be filled!'
     })
   }
 
   if (username.length < 3 || password.length < 3) {
     return response.status(400).json({
-      error: 'username and password has to be at least 3 characters long'
+      error: 'username and password has to be at least 3 characters long!'
+    })
+  }
+
+  if (username.includes(' ') || password.includes(' ')) {
+    return response.status(400).json({
+      error: 'username and password may not include spaces!'
     })
   }
 
