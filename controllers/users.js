@@ -8,7 +8,7 @@ usersRouter.post('/', async (request, response) => {
   const existingUser = await User.findOne({ username })
   if (existingUser) {
     return response.status(400).json({
-      error: 'username must be unique'
+      error: 'username is already in use!'
     })
   }
   // can also implement checking for username permitted char
