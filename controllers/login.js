@@ -20,6 +20,7 @@ loginRouter.post('/', async (request, response) => {
   const userForToken = {
     username: user.username,
     id: user._id,
+    refreshToken: user.refreshToken
   }
 
   //creates token with username and id, uses secret to digitally sign
@@ -35,7 +36,7 @@ loginRouter.post('/', async (request, response) => {
 
   response
     .status(200)
-    .send({ token, username: user.username, name: user.name })
+    .send({ token, username: user.username, name: user.name, refreshToken: user.refreshToken })
 })
 
 module.exports = loginRouter
