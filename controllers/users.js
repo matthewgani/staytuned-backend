@@ -5,6 +5,8 @@ const User = require('../models/user')
 usersRouter.post('/', async (request, response) => {
   const { username, name, password } = request.body
 
+  request.body.refreshToken = null
+
   const existingUser = await User.findOne({ username })
   if (existingUser) {
     return response.status(400).json({
@@ -39,6 +41,7 @@ usersRouter.post('/', async (request, response) => {
     username,
     name,
     passwordHash,
+    refreshToken: request.body.refreshToken,
   })
 
   const savedUser = await user.save()
@@ -46,6 +49,16 @@ usersRouter.post('/', async (request, response) => {
   response.status(201).json(savedUser)
 })
 
+usersRouter.put('/:id', async (request, response) => {
+  const { refreshToken } = request.body
+
+  const updatedUser = {
+    refreshToken: refreshToken
+  }
+
+  const user = await User.findByIdAndUpdate(request.params.id, updatedUser, { new: true })
+  response.json(user)
+})
 
 usersRouter.get('/', async (request, response) => {
   const users = await User.find({}).populate('comments', { content: 1, date: 1, songID: 1 })
